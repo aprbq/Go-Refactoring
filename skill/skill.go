@@ -60,17 +60,20 @@ func (r record) unmarshalLevels() ([]Level, error) {
 	return lvl, err
 }
 
-func findSkillByKey(db *sql.DB, key string) (Skill, error) {
-	row := db.QueryRow("SELECT key, name, description, logo, levels, tags FROM skill WHERE key = $1", key)
-
-	r := record{}
+func (r record) decode(row *sql.Row) (Skill, error) {
 	if err := row.Scan(&r.Key, &r.Name, &r.Description, &r.Logo, &r.Levels, &r.Tags); err != nil {
 		return Skill{}, err
 	}
 
 	lvl, err := r.unmarshalLevels()
-
 	return r.toSkills(lvl), err
+}
+
+func findSkillByKey(db *sql.DB, key string) (Skill, error) {
+	row := db.QueryRow("SELECT key, name, description, logo, levels, tags FROM skill WHERE key = $1", key)
+
+	r := record{}
+	return r.decode(row)
 }
 
 func (h handler) GetSkillByKey(c *gin.Context) {
