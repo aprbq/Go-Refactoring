@@ -43,7 +43,18 @@ type record struct {
 	Tags        pq.StringArray
 }
 
-func unmarshalLevels(r record) ([]Level, error) {
+func (r record) toSkills(lvl []Level) Skill {
+	return Skill{
+		Key:         r.Key,
+		Name:        r.Name,
+		Description: r.Description,
+		Logo:        r.Logo,
+		Tags:        r.Tags,
+		Levels:      lvl,
+	}
+}
+
+func (r record) unmarshalLevels() ([]Level, error) {
 	lvl := []Level{}
 	if err := json.Unmarshal(r.Levels, &lvl); err != nil {
 		return []Level{}, err
@@ -59,21 +70,12 @@ func findSkillByKey(db *sql.DB, key string) (Skill, error) {
 		return Skill{}, err
 	}
 
-	lvl, err := unmarshalLevels(r)
+	lvl, err := r.unmarshalLevels()
 	if err != nil {
 		return Skill{}, err
 	}
 
-	s := Skill{
-		Key:         r.Key,
-		Name:        r.Name,
-		Description: r.Description,
-		Logo:        r.Logo,
-		Tags:        r.Tags,
-		Levels:      lvl,
-	}
-
-	return s, nil
+	return r.toSkills(lvl), nil
 }
 
 func (h handler) GetSkillByKey(c *gin.Context) {
