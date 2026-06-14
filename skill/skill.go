@@ -43,6 +43,14 @@ type record struct {
 	Tags        pq.StringArray
 }
 
+func unmarshalLevels(r record) ([]Level, error) {
+	lvl := []Level{}
+	if err := json.Unmarshal(r.Levels, &lvl); err != nil {
+		return []Level{}, err
+	}
+	return lvl, nil
+}
+
 func findSkillByKey(db *sql.DB, key string) (Skill, error) {
 	row := db.QueryRow("SELECT key, name, description, logo, levels, tags FROM skill WHERE key = $1", key)
 
@@ -50,8 +58,9 @@ func findSkillByKey(db *sql.DB, key string) (Skill, error) {
 	if err := row.Scan(&r.Key, &r.Name, &r.Description, &r.Logo, &r.Levels, &r.Tags); err != nil {
 		return Skill{}, err
 	}
-	lvl := []Level{}
-	if err := json.Unmarshal(r.Levels, &lvl); err != nil {
+
+	lvl, err := unmarshalLevels(r)
+	if err != nil {
 		return Skill{}, err
 	}
 
