@@ -27,11 +27,15 @@ type Skill struct {
 }
 
 type handler struct {
-	db *sql.DB
+	storage storage
 }
 
 func NewHandler(db *sql.DB) handler {
-	return handler{db: db}
+	return handler{storage: storage{db: db}}
+}
+
+type storage struct {
+	db *sql.DB
 }
 
 type record struct {
@@ -69,8 +73,8 @@ func (r record) decode(row *sql.Row) (Skill, error) {
 	return r.toSkills(lvl), err
 }
 
-func findSkillByKey(db *sql.DB, key string) (Skill, error) {
-	row := db.QueryRow("SELECT key, name, description, logo, levels, tags FROM skill WHERE key = $1", key)
+func (s storage) findSkillByKey(key string) (Skill, error) {
+	row := s.db.QueryRow("SELECT key, name, description, logo, levels, tags FROM skill WHERE key = $1", key)
 
 	r := record{}
 	return r.decode(row)
@@ -79,7 +83,7 @@ func findSkillByKey(db *sql.DB, key string) (Skill, error) {
 func (h handler) GetSkillByKey(c *gin.Context) {
 	key := c.Param("key")
 
-	skill, err := findSkillByKey(h.db, key)
+	skill, err := h.storage.findSkillByKey(key)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
