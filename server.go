@@ -50,7 +50,9 @@ func main() {
 	}
 	defer db.Close()
 
-	h := skill.NewHandler(db)
+	s := skill.NewStorage(db)
+	h := skill.NewHandler(s)
+
 	r.GET("/skills/:key", h.GetSkillByKey)
 
 	r.GET("/skills", func(c *gin.Context) {

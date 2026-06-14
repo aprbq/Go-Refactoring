@@ -6,7 +6,7 @@ run:
 
 test:
 	@echo "Running the tests..."
-	go test -v ./... | ./colorize
+	go test -v ./... 
 
 cover:
 	@echo "Running the tests with coverage..."

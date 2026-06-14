@@ -38,7 +38,8 @@ func TestSkillHandler(t *testing.T) {
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = append(c.Params, gin.Param{Key: "key", Value: "go"})
 
-		h := NewHandler(db)
+		s := NewStorage(db)
+		h := NewHandler(s)
 		h.GetSkillByKey(c)
 
 		want := `{"data":{"key":"go","name":"Go","description":"Go is an open source programming...","logo":"","levels":[{"key":"","name":"Beginner","brief":"","descriptions":["basic knowledge ..."],"level":1},{"key":"","name":"Intermediate","brief":"","descriptions":["complex programs..."],"level":2}],"tags":["go","golang"]}}`
@@ -59,7 +60,8 @@ func TestSkillHandler(t *testing.T) {
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = append(c.Params, gin.Param{Key: "key", Value: "go"})
 
-		h := NewHandler(db)
+		s := NewStorage(db)
+		h := NewHandler(s)
 		h.GetSkillByKey(c)
 
 		want := `{"error":"sql: no rows in result set"}`
@@ -88,7 +90,8 @@ func TestSkillHandler(t *testing.T) {
 		c, _ := gin.CreateTestContext(rec)
 		c.Params = append(c.Params, gin.Param{Key: "key", Value: "go"})
 
-		h := NewHandler(db)
+		s := NewStorage(db)
+		h := NewHandler(s)
 		h.GetSkillByKey(c)
 
 		want := `{"error":"invalid character 'i' looking for beginning of value"}`
