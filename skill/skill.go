@@ -56,10 +56,8 @@ func (r record) toSkills(lvl []Level) Skill {
 
 func (r record) unmarshalLevels() ([]Level, error) {
 	lvl := []Level{}
-	if err := json.Unmarshal(r.Levels, &lvl); err != nil {
-		return []Level{}, err
-	}
-	return lvl, nil
+	err := json.Unmarshal(r.Levels, &lvl)
+	return lvl, err
 }
 
 func findSkillByKey(db *sql.DB, key string) (Skill, error) {
@@ -71,11 +69,8 @@ func findSkillByKey(db *sql.DB, key string) (Skill, error) {
 	}
 
 	lvl, err := r.unmarshalLevels()
-	if err != nil {
-		return Skill{}, err
-	}
 
-	return r.toSkills(lvl), nil
+	return r.toSkills(lvl), err
 }
 
 func (h handler) GetSkillByKey(c *gin.Context) {
