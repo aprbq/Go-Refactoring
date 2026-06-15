@@ -9,6 +9,8 @@ import (
 
 type Storage interface {
 	FindSkillByKey(key string) (Skill, error)
+	FindSkills() ([]Skill, error)
+	CreateSkill(skill Skill) error
 }
 
 type storage struct {
@@ -59,4 +61,43 @@ func (s storage) FindSkillByKey(key string) (Skill, error) {
 
 	r := record{}
 	return r.decode(row)
+}
+
+func (s storage) FindSkills() ([]Skill, error) {
+	rows, err := s.db.Query("SELECT key, name, description, logo, levels, tags FROM skill")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	skills := []Skill{}
+	for rows.Next() {
+		r := record{}
+		if err := rows.Scan(&r.Key, &r.Name, &r.Description, &r.Logo, &r.Levels, &r.Tags); err != nil {
+			return nil, err
+		}
+		lvl, err := r.unmarshalLevels()
+		if err != nil {
+			return nil, err
+		}
+		skills = append(skills, r.toSkills(lvl))
+	}
+	return skills, rows.Err()
+}
+
+func (s storage) CreateSkill(skill Skill) error {
+	levels, err := json.Marshal(skill.Levels)
+	if err != nil {
+		return err
+	}
+
+	tags := pq.StringArray(skill.Tags)
+	stmt, err := s.db.Prepare("INSERT INTO skill (key, name, description, logo, levels, tags) VALUES ($1, $2, $3, $4, $5, $6)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(skill.Key, skill.Name, skill.Description, skill.Logo, levels, tags)
+	return err
 }

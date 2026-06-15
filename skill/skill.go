@@ -42,3 +42,28 @@ func (h handler) GetSkillByKey(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": skill})
 }
+
+func (h handler) GetSkill(c *gin.Context) {
+	skills, err := h.storage.FindSkills()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": skills})
+}
+
+func (h handler) CreateSkill(c *gin.Context) {
+	var skill Skill
+	if err := c.ShouldBindJSON(&skill); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.storage.CreateSkill(skill); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": skill})
+}

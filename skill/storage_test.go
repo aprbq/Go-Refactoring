@@ -8,7 +8,6 @@ import (
 )
 
 func TestRecord(t *testing.T) {
-
 	t.Run("toSkill", func(t *testing.T) {
 		r := record{
 			Key:         "key",
